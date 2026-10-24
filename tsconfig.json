@@ -7,6 +7,7 @@
     "types": ["react-native", "node"],
     /* Completeness */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+    "resolveJsonModule": true,                           /* Allow importing .json (user-api presets) */
 
     "rootDir": "./",
     "paths": {

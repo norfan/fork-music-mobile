@@ -74,13 +74,16 @@ const mrcTools = {
     return this.getText(url)
   },
   async getMusicInfo(songInfo) {
-    return songInfo.mrcUrl == null
-      ? getMusicInfo(songInfo.songmid)
-      : songInfo
+    if (songInfo.mrcUrl != null) return songInfo
+    // 网络异常或接口返回空列表时 getMusicInfo(songmid) 可能为 undefined，
+    // 此时回退到原始 songInfo，避免后续 info.mrcUrl 读取空指针。
+    const info = await getMusicInfo(songInfo.songmid).catch(() => null)
+    return info ?? songInfo
   },
   getLyric(songInfo) {
     return {
       promise: this.getMusicInfo(songInfo).then(info => {
+        if (!info) return Promise.reject(new Error('获取歌词失败'))
         let p
         if (info.mrcUrl) p = this.getMrc(info.mrcUrl)
         else if (info.lrcUrl) p = this.getLrc(info.lrcUrl)

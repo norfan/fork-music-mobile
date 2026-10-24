@@ -1,14 +1,16 @@
-import { initSetting, showPactModal } from '@/core/common'
+import { initSetting, showPactModal, updateSetting } from '@/core/common'
 import registerPlaybackService from '@/plugins/player/service'
 import initTheme from './theme'
 import initI18n from './i18n'
 import initUserApi from './userApi'
+import { seedUserApiPresets } from './userApi/seedPresets'
 import initPlayer from './player'
 import dataInit from './dataInit'
 import initSync from './sync'
 import initCommonState from './common'
 import { initDeeplink } from './deeplink'
 import { setApiSource } from '@/core/apiSource'
+import { getUserApiList } from '@/utils/data'
 import commonActions from '@/store/common/action'
 import settingState from '@/store/setting/state'
 import { checkUpdate } from '@/core/version'
@@ -47,6 +49,15 @@ export default async() => {
 
   await initUserApi(setting)
   bootLog('User Api inited.')
+
+  // Seed built-in user-api sources on a fresh install so the app is playable out of the box
+  if ((await getUserApiList()).length === 0) {
+    const defaultApiId = await seedUserApiPresets()
+    if (defaultApiId) {
+      setting['common.apiSource'] = defaultApiId
+      updateSetting({ 'common.apiSource': defaultApiId })
+    }
+  }
 
   setApiSource(setting['common.apiSource'])
   bootLog('Api inited.')
